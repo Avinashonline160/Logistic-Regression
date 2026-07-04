@@ -22,7 +22,7 @@ st.write("Predict house price using Linear Regression")
 def load_and_train():
     # Dynamic path handling to fix Streamlit Cloud's FileNotFoundError
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    csv_path = os.path.join(current_dir, "houseprice.csv")
+    csv_path = os.path.join(current_dir, "insurance_data.csv")
     
     # Read the data
     df = pd.read_csv(csv_path)
