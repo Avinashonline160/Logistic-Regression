@@ -1,78 +1,56 @@
 import streamlit as st
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-import os
+from sklearn.linear_model import LogisticRegression
 
 # -----------------------------------
 # Page Configuration
 # -----------------------------------
 st.set_page_config(
-    page_title="House Price Prediction",
+    page_title="Insurance Sales Prediction",
     page_icon="🏠",
     layout="centered"
 )
 
-st.title("🏠 House Price Prediction")
-st.write("Predict house price using Linear Regression")
+st.title("🏠 Project 3: Insurance Sales Prediction")
+st.write("Predict Insurance Sales using Logistic Regression")
 
 # -----------------------------------
-# Load Dataset & Train Model (Cached & Path-Safe)
+# Load Dataset
 # -----------------------------------
-@st.cache_data
-def load_and_train():
-    # Dynamic path handling to fix Streamlit Cloud's FileNotFoundError
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    csv_path = os.path.join(current_dir, "insurance_data.csv")
-    
-    # Read the data
-    df = pd.read_csv(csv_path)
-    
-    # Extract features and target variable
-    # Using double brackets [['area']] ensures X stays a 2D array/DataFrame
-    X = df[["area"]] 
-    y = df["price"]
-    
-    # Train the Linear Regression model
-    model = LinearRegression()
-    model.fit(X, y)
-    
-    return df, model
+df = pd.read_csv("insurance_data.csv")
 
-# Execute the data loading and training
-try:
-    df, model = load_and_train()
-except FileNotFoundError:
-    st.error("""
-        **Crucial Error: `houseprice.csv` not found!** Please ensure that the file `houseprice.csv` is uploaded to your GitHub repository in the exact same folder as this `app.py` file.
-    """)
-    st.stop()
+st.subheader("Insurance Dataset")
+st.dataframe(df)
 
 # -----------------------------------
-# Display Dataset Preview
+# Train Model
 # -----------------------------------
-st.subheader("Dataset Preview")
-st.dataframe(df.head())
+
+X_train, X_test, y_train, y_test = train_test_split(df[['age']],df.bought_insurance,train_size=0.8)
+
+model = LogisticRegression()
+
+model.fit(X_train, y_train)
 
 # -----------------------------------
 # User Input
 # -----------------------------------
-st.subheader("Enter House Area")
+st.subheader("Enter Age of person:")
 
-area = st.number_input(
-    "Area (Square Feet)",
-    min_value=100,
-    max_value=10000,
-    value=3300,
-    step=100
+age = st.number_input(
+    "Age (in Years)",
+    min_value=10,
+    max_value=65,
+    value=18,
+    step=1
 )
 
 # -----------------------------------
-# Prediction Logic
+# Prediction
 # -----------------------------------
-if st.button("Predict Price"):
-    # Convert input into a DataFrame with identical feature name ('area')
-    input_data = pd.DataFrame([[area]], columns=["area"])
-    prediction = model.predict(input_data)
+if st.button("Predict Insurance in Yes/No:"):
+
+    prediction = model.predict([[age]])
 
     st.success(f"Predicted Price: ₹ {prediction[0]:,.2f}")
 
@@ -81,6 +59,9 @@ if st.button("Predict Price"):
 # -----------------------------------
 st.subheader("Model Details")
 
-st.write(f"**Coefficient:** {model.coef_[0]:.2f}")
-st.write(f"**Intercept:** {model.intercept_:.2f}")
+st.write("Coefficient:", model.coef_[0])
+st.write("Intercept:", model.intercept_)
+    
+
+
     
